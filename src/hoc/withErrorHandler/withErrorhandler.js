@@ -26,7 +26,7 @@ const withErrorHandler = (WrappedComponent, axios) => {
         const errorConfirmedHandler = () => {
             setError(null)
         }
-        console.log('error is', error)
+
         return (
             <Aux>
                 <Modal

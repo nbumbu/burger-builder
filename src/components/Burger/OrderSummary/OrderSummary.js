@@ -1,22 +1,17 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Aux from '../../../hoc/Aux/Aux';
 import Button from '../../UI/Button/Button';
 
-class OrderSummary extends Component {
-
-    componentWillUpdate() {
-        console.log('[OrderSummary.js] componentWillUpdate')
-    }
-
-    render() {
-        const ingredientSummary = Object.keys(this.props.ingredients).map(
+const OrderSummary  = props => {
+    
+        const ingredientSummary = Object.keys(props.ingredients).map(
             (igKey) => {
                 return (
                     <li key={igKey}>
                         <span style={{ textTransform: 'capitalize' }}>
                             {igKey}
                         </span>
-                        : {this.props.ingredients[igKey]}
+                        : {props.ingredients[igKey]}
                     </li>
                 )
             }
@@ -30,15 +25,14 @@ class OrderSummary extends Component {
                 </ul>
                 <p>
                     <strong>
-                        Total Price: {this.props.price}
+                        Total Price: {props.price}
                     </strong>
                 </p>
                 <p>Continue to Checkout?</p>
-                <Button btnType="Danger" clicked={this.props.purchaseCanceled}>CANCEL</Button>
-                <Button btnType="Success" clicked={this.props.purchaseContinued}>CONTINUE</Button>
+                <Button btnType="Danger" clicked={props.purchaseCanceled}>CANCEL</Button>
+                <Button btnType="Success" clicked={props.purchaseContinued}>CONTINUE</Button>
             </Aux>
         )
-    }
 
 
 };

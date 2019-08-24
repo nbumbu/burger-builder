@@ -1,36 +1,39 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import Order from '../../components/Order/Order';
 import { connect } from 'react-redux';
 import axios from '../../axios-order';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorhandler';
 import * as actions from '../../store/actions/index';
 import Spinner from '../../components/UI/Spinner/Spinner'
-class Orders extends Component {
+const Orders = props => {
 
-    componentDidMount() {
-        this.props.onFetchOrders();
+    // componentDidMount() {
+    //     this.props.onFetchOrders();
+    // }
+    useEffect(() => {
+        props.onFetchOrders();
+    }, [])
+
+    let orders = <Spinner></Spinner>
+    console.log('mia-props', props)
+    if (!props.loading) {
+        orders = props.orders.map(
+            (order) => {
+                return <Order
+                    key={order.id}
+                    ingredients={order.ingredients}
+                    price={order.price}
+                ></Order>
+            }
+        )
     }
 
-    render() {
-        let orders = <Spinner></Spinner>
-        console.log('mia-props', this.props)
-        if (!this.props.loading) {
-            orders = this.props.orders.map(
-                (order) => {
-                    return <Order
-                        key={order.id}
-                        ingredients={order.ingredients}
-                        price={order.price}
-                    ></Order>
-                }
-            )
-        }
-        return (
-            <div>
-                {orders}
-            </div>
-        );
-    }
+    return (
+        <div>
+            {orders}
+        </div>
+    );
+
 }
 
 const mapStateToProps = state => {
