@@ -10,9 +10,10 @@ const Orders = props => {
     // componentDidMount() {
     //     this.props.onFetchOrders();
     // }
+    const {onFetchOrders} = props;
     useEffect(() => {
-        props.onFetchOrders();
-    }, [])
+        onFetchOrders();
+    }, [onFetchOrders]);
 
     let orders = <Spinner></Spinner>
     console.log('mia-props', props)
