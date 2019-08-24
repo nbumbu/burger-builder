@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+
+
 import Aux from '../../hoc/Aux/Aux';
 import Burger from '../../components/Burger/Burger'
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
@@ -7,13 +9,33 @@ import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import axios from '../../axios-order';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorhandler';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '../../store/actions/index';
 
 export const BurgerBuilder = props => {
 
     const [purchasingState, setPurchasingState] = useState(false);
-    const {onInitIngredients} = props;
+
+
+    const dispatch = useDispatch();
+    const ings = useSelector(state => {
+        return state.burgerBuilder.ingredients
+    })
+
+    const price = useSelector(state => {
+        console.log('burger',state.burgerBuilder)
+        return state.burgerBuilder.totalPrice
+    })
+
+    const error = useSelector(state => {
+        return state.burgerBuilder.error
+    })
+
+    const onIngredientAdded = (ingredientName) => dispatch(actions.addIngredient(ingredientName));
+    const onIngredientRemoved = (ingredient) => dispatch(actions.removeIngredient(ingredient));
+    const onInitIngredients = useCallback(() => dispatch(actions.initIngredients()), [dispatch]);
+    const onInitPurchase = () => dispatch(actions.purchaseInit());
+
 
     useEffect(() => {
         onInitIngredients()
@@ -37,67 +59,50 @@ export const BurgerBuilder = props => {
     }
 
     const purchaseContinueHandler = () => {
-        props.onInitPurchase();
+        onInitPurchase();
         props.history.push({
             pathname: '/checkout'
         });
     }
 
-        const disbledInfo = {
-            ...props.ings
-        }
-
-        for (let key in disbledInfo) {
-            disbledInfo[key] = disbledInfo[key] <= 0
-        }
-        let orderSummary = null;
-
-        let burger = props.error ? <p>Ingredients can not be loaded</p> : <Spinner />
-        console.log(props.ings)
-        if (props.ings) {
-            burger = (<Aux>
-                <Burger ingredients={props.ings} />
-                <BuildControls
-                    ingredientAdded={props.onIngredientAdded}
-                    ingredientRemoved={props.onIngredientRemoved}
-                    disabledInfo={disbledInfo}
-                    price={props.price}
-                    purchasable={updatePurchaseState(props.ings)}
-                    ordered={purchaseHandler} />
-            </Aux>)
-            orderSummary = <OrderSummary
-                ingredients={props.ings}
-                purchaseCanceled={purchaseCancelHandler}
-                purchaseContinued={purchaseContinueHandler}
-                price={props.price.toFixed(2)} />
-        }
-
-        return (
-            <Aux>
-                <Modal show={purchasingState} modalClosed={purchaseCancelHandler}>
-                    {orderSummary}
-                </Modal>
-                {burger}
-
-            </Aux>
-        )
-}
-
-const mapStateToProps = state => {
-    return {
-        ings: state.burgerBuilder.ingredients,
-        price: state.burgerBuilder.totalPrice,
-        error: state.burgerBuilder.error
+    const disbledInfo = {
+        ...ings
     }
-}
 
-const mapDispatchToProps = dispatch => {
-    return {
-        onIngredientAdded: (ingredientName) => dispatch(actions.addIngredient(ingredientName)),
-        onIngredientRemoved: (ingredient) => dispatch(actions.removeIngredient(ingredient)),
-        onInitIngredients: () => dispatch(actions.initIngredients()),
-        onInitPurchase: () => dispatch(actions.purchaseInit())
+    for (let key in disbledInfo) {
+        disbledInfo[key] = disbledInfo[key] <= 0
     }
+    let orderSummary = null;
+
+    let burger = error ? <p>Ingredients can not be loaded</p> : <Spinner />
+    console.log('price', price)
+    if (ings) {
+        burger = (<Aux>
+            <Burger ingredients={ings} />
+            <BuildControls
+                ingredientAdded={onIngredientAdded}
+                ingredientRemoved={onIngredientRemoved}
+                disabledInfo={disbledInfo}
+                price={price}
+                purchasable={updatePurchaseState(ings)}
+                ordered={purchaseHandler} />
+        </Aux>)
+        orderSummary = <OrderSummary
+            ingredients={ings}
+            purchaseCanceled={purchaseCancelHandler}
+            purchaseContinued={purchaseContinueHandler}
+            price={price.toFixed(2)} />
+    }
+
+    return (
+        <Aux>
+            <Modal show={purchasingState} modalClosed={purchaseCancelHandler}>
+                {orderSummary}
+            </Modal>
+            {burger}
+
+        </Aux>
+    )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(BurgerBuilder, axios));
+export default (withErrorHandler(BurgerBuilder, axios));
